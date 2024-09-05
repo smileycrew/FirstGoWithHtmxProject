@@ -94,11 +94,14 @@ func (template *Template) Render(writer io.Writer, name string, data interface{}
 
 // newTemplate - create new template instance and parse out the html file
 func newTemplate() *Template {
+	tmpl := template.Must(template.ParseGlob("*templates/pages/*.html"))
+	tmpl = template.Must(tmpl.ParseGlob("templates/partials/*.html"))
+	tmpl = template.Must(tmpl.ParseGlob("templates/layouts/*.html"))
 	// creates instance and returns a pointer to the template
 	return &Template{
 		// ParseGlob parses the html files that match the pattern
 		// .Must wraps ParseGlub and throws an error if there is an issue parsing the html
-		templates: template.Must(template.ParseGlob("*views/*.html")),
+		templates: tmpl,
 	}
 }
 

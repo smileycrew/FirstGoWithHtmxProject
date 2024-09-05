@@ -1,0 +1,24 @@
+{{ block "form" . }}
+<!-- outer html will swap the entire element and the contents within -->
+<form class="flex flex-col gap-5" hx-swap="outerHTML" hx-post="/contacts">
+    <div class="flex flex-col space-y-3">
+        <label>Email:</label>
+        <input class="border p-3 rounded-md" name="email" type="text" {{ if .Values.email }} value="{{ .Values.email }}"
+            {{ end }} />
+    </div>
+
+    <div class="flex flex-col space-y-3">
+        <label>Name:</label>
+        <input class="border p-3 rounded-md" name="name" type="text" {{ if .Values.name }} value="{{ .Values.name }}" {{
+            end }} />
+    </div>
+
+    {{ if .Errors.email }}
+    <div>
+        <p class="text-red-500">{{ .Errors.email }}</p>
+    </div>
+    {{ end }}
+
+    <button class="bg-blue-500 border p-3 rounded-md text-white/90" type="submit">Submit</button>
+</form>
+{{ end }}
