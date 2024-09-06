@@ -1,0 +1,7 @@
+{{ block "main" . }}
+<main class="flex flex-col items-center justify-center">
+    {{ template "form" .Form }}
+
+    {{ template "contact-list" .Data }}
+</main>
+{{ end }}

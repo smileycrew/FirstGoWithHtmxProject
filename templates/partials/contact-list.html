@@ -1,0 +1,7 @@
+{{ block "contact-list" . }}
+<ul id="contacts">
+    {{ range .Contacts }}
+    {{ template "contact-list-item" . }}
+    {{ end }}
+</ul>
+{{ end }}

@@ -1,87 +1,16 @@
 package main
 
 import (
+	"example/FirstApi/models"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"html/template"
 	"strconv"
 	"time"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
 	// Short answer: used to communication over the network and give development data
 	"io"
 )
 
-type FormData struct {
-	Values map[string]string
-	Errors map[string]string
-}
-
-func newFormData() FormData {
-	return FormData{
-		Values: make(map[string]string),
-		Errors: make(map[string]string),
-	}
-}
-
-// ==============================
-var id = 0
-
-type Contact struct {
-	Email string
-	Id    int
-	Name  string
-}
-
-type Contacts = []Contact
-
-type Data struct {
-	Contacts Contacts
-}
-
-func (data *Data) indexOf(id int) int {
-	for i, contact := range data.Contacts {
-		if contact.Id == id {
-			return i
-		}
-	}
-
-	return -1
-}
-
-// isEmailTaken - returns a boolean if email exists from the Contacts pointer
-func (data *Data) isEmailTaken(email string) bool {
-	for _, contact := range data.Contacts {
-		if contact.Email == email {
-			return true
-		}
-	}
-
-	return false
-}
-
-// newContact - creates a new contact struct using the provided email and name
-func newContact(email string, name string) Contact {
-	id++
-	return Contact{
-		Email: email,
-		Id:    id,
-		Name:  name,
-	}
-}
-
-// initialData - used to initialize the data and provide two contacts when program runs
-func initialData() Data {
-	return Data{
-		Contacts: []Contact{
-			newContact("jd@gmail.com", "John"),
-			newContact("em@gmail.com", "Ed"),
-		},
-	}
-}
-
-// ==============================
-// ==============================
 type Template struct {
 	templates *template.Template // *template.Template is a type which is used to represent one of more parsed templates
 }
@@ -105,28 +34,15 @@ func newTemplate() *Template {
 	}
 }
 
-// ==============================
-type Page struct {
-	Data Data
-	Form FormData
-}
-
-// initialPageInfo - returns a page with the initial data and an empty form
-func initialPageInfo() Page {
-	return Page{
-		Data: initialData(),
-		Form: newFormData(),
-	}
-}
-
-// ==============================
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 
-	page := initialPageInfo()
+	page := models.InitialPageInfo()
 
 	e.Renderer = newTemplate()
+
+	e.Static("/styles", "styles")
 
 	e.GET("/", func(context echo.Context) error {
 		return context.Render(200, "index", page)
@@ -136,8 +52,8 @@ func main() {
 		email := context.FormValue("email")
 		name := context.FormValue("name")
 
-		if page.Data.isEmailTaken(email) {
-			formData := newFormData()
+		if page.Data.IsEmailTaken(email) {
+			formData := models.NewFormData()
 			formData.Values["email"] = email
 			formData.Values["name"] = name
 			formData.Errors["email"] = "Email could not be saved."
@@ -145,10 +61,10 @@ func main() {
 			return context.Render(422, "form", formData)
 		}
 
-		contact := newContact(email, name)
+		contact := models.NewContact(email, name)
 		page.Data.Contacts = append(page.Data.Contacts, contact)
 
-		context.Render(200, "form", newFormData())
+		context.Render(200, "form", models.NewFormData())
 
 		return context.Render(200, "oob-contact", contact)
 	})
@@ -162,7 +78,7 @@ func main() {
 			return context.String(400, "Invalid id.")
 		}
 
-		index := page.Data.indexOf(id)
+		index := page.Data.IndexOf(id)
 
 		if index == -1 {
 			return context.String(404, "Contact not found")
